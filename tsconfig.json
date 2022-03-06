@@ -1,0 +1,18 @@
+{
+    "compilerOptions": {
+      "outDir": "./lib",
+      "declaration": true,
+      "module": "commonjs",
+      "target": "esnext",
+      "lib": ["esnext"],
+      "strict": true,
+      "preserveConstEnums": true,
+      "moduleResolution": "node",
+      "esModuleInterop": true,
+      "types": [
+        "@types/buffer-from"
+      ]
+    },
+    "include": ["src"],
+    "exclude": ["node_modules", "dist", "test"]
+  }
