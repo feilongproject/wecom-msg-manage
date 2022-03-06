@@ -47,7 +47,7 @@ export class WxCom {
      * @param nonce 随机数
      * @returns 解密后的消息
      */
-    async MsgDecode(body: string, msg_signature: string, timestamp: number, nonce: number,) {
+    async MsgDecode(body: string, msg_signature: string, timestamp: number, nonce: number,): Promise<textMessage | picMessage | voiceMessage> {
         //console.log(body)
         var receBody: receBody = await xml2js.parseStringPromise(body).then((res) => {
             return res.xml;
@@ -81,7 +81,7 @@ export class WxCom {
                         Content: res.Content[0],
                         MsgId: res.MsgId[0],
                         AgentID: res.AgentID[0],
-                    }
+                    };
                 case "image":
                     return {
                         ToUserName: res.ToUserName[0],
@@ -92,7 +92,7 @@ export class WxCom {
                         MsgId: res.MsgId[0],
                         MediaId: res.MediaId[0],
                         AgentID: res.AgentID[0],
-                    }
+                    };
                 case "voice":
                     return {
                         ToUserName: res.ToUserName[0],
@@ -103,10 +103,9 @@ export class WxCom {
                         Format: res.Format[0],
                         MsgId: res.MsgId[0],
                         AgentID: res.AgentID[0],
-                    }
+                    };
                 default:
-                    return {}
-
+                    throw Error("unkown msg type");
             }
 
         })
@@ -240,4 +239,36 @@ interface receBody {
     ToUserName: string,
     AgentID: number,
     Encrypt: string,
+}
+
+interface textMessage {
+    ToUserName: string;
+    FromUserName: string;
+    CreateTime: number;
+    MsgType: "text";
+    Content: string;
+    MsgId: string;
+    AgentID: string;
+}
+
+interface picMessage {
+    ToUserName: string;
+    FromUserName: string;
+    CreateTime: number;
+    MsgType: "image";
+    PicUrl: string;
+    MediaId: string;
+    MsgId: number;
+    AgentID: number;
+}
+
+interface voiceMessage {
+    ToUserName: string;
+    FromUserName: string;
+    CreateTime: number;
+    MsgType: "voice";
+    MediaId: string;
+    Format: string;
+    MsgId: number;
+    AgentID: number;
 }

@@ -1,6 +1,6 @@
 {
   "name": "wecom-msg-manage",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "企业微信程序消息管理",
   "main": "lib/index.js",
   "directories": {
