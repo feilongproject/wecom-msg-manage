@@ -2,8 +2,6 @@
 import xml2js from 'xml2js'
 import { Buffer } from 'buffer'
 import { createHash, createDecipheriv, randomBytes, createCipheriv } from 'crypto';
-import fetch from 'node-fetch';
-
 
 export class WxCom {
     AgentId: number;
@@ -47,7 +45,7 @@ export class WxCom {
      * @param nonce 随机数
      * @returns 解密后的消息
      */
-    async MsgDecode(body: string, msg_signature: string, timestamp: number, nonce: number,): Promise<textMessage | picMessage | voiceMessage> {
+    async MsgDecode(body: string, msg_signature: string, timestamp: number, nonce: number,): Promise<textMessage | picMessage | voiceMessage | eventMessage> {
         //console.log(body)
         var receBody: receBody = await xml2js.parseStringPromise(body).then((res) => {
             return res.xml;
@@ -69,7 +67,7 @@ export class WxCom {
             return res.xml
         }).then(res => {
             //console.log(`${JSON.stringify(res)}`)
-            console.log(`xml to json: ${JSON.stringify(res)}`)
+            //console.log(`xml to json: ${JSON.stringify(res)}`)
             var MsgType = res.MsgType[0]
             switch (MsgType) {
                 case "text":
@@ -104,6 +102,17 @@ export class WxCom {
                         MsgId: res.MsgId[0],
                         AgentID: res.AgentID[0],
                     };
+                case "event":
+                    return {
+                        ToUserName: res.ToUserName[0],
+                        FromUserName: res.FromUserName[0],
+                        CreateTime: res.CreateTime[0],
+                        MsgType: res.MsgType[0],
+                        Event: res.Event[0],
+                        EventKey: res.EventKey[0],
+                        AgentID: res.AgentID[0],
+                    };
+
                 default:
                     throw Error("unkown msg type");
             }
@@ -247,8 +256,8 @@ interface textMessage {
     CreateTime: number;
     MsgType: "text";
     Content: string;
-    MsgId: string;
-    AgentID: string;
+    MsgId: number;
+    AgentID: number;
 }
 
 interface picMessage {
@@ -271,4 +280,14 @@ interface voiceMessage {
     Format: string;
     MsgId: number;
     AgentID: number;
+}
+
+interface eventMessage {
+    ToUserName: string;
+    FromUserName: string;
+    CreateTime: number;
+    MsgType: "event";
+    AgentID: number;
+    Event: string;
+    EventKey: string;
 }

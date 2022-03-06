@@ -1,6 +1,6 @@
 {
   "name": "wecom-msg-manage",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "description": "企业微信程序消息管理",
   "main": "lib/index.js",
   "directories": {
@@ -21,9 +21,7 @@
   },
   "devDependencies": {
     "@types/buffer-from": "^1.1.0",
-    "@types/node": "^17.0.21",
     "@types/xml2js": "^0.4.9",
-    "node-fetch": "^3.2.1",
     "ts-loader": "^9.2.7"
   }
 }
