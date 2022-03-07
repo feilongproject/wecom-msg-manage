@@ -25,17 +25,56 @@ export class WxCom {
         this.EncodingAESKey = EncodingAESKey;
     }
 
+    /**
+     * 获取Token，修改过期时间为毫秒计、添加addIn时间戳
+     * @param acToken 
+     * @returns 返回新Token
+     */
+    async GetToken(oldToken?: Token): Promise<Token> {
 
-    async GetToken(): Promise<Token> {
+        var nowTime = (new Date()).getTime()
 
-        const NewToken: Token = await fetch(`https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid=${this.Id}&corpsecret=${this.Secret}`).then(async res => {
-            //const r: any = res.json()
-            //console.log(`New Token: ${JSON.stringify(r)}`)
-            return JSON.parse(await res.text());
-        })
-        return NewToken;
+
+        if ((!oldToken) || (oldToken.addIn + oldToken.expires_in < nowTime)) {
+            return await fetch(`https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid=${this.Id}&corpsecret=${this.Secret}`).then(async res => {
+                var T: Token = JSON.parse(await res.text());
+                T.addIn = (new Date()).getTime();
+                T.expires_in *= 1000;
+                return T;
+            });
+        } else {
+            return oldToken;
+        }
+
     }
+    /**
+     * 发送信息
+     * @param type 发送信息类型
+     * @param msg 发送信息主体
+     * @param toUid 发送信息至uid
+     * @returns 返回一个新Token与信息发送结果
+     */
+    async MsgSend(type: string, msg: string, toUid: string,): Promise<{ sendMsgRes: SendMsg; newToken: Token; }> {
 
+        const newToken = await this.GetToken()
+        var sendMsgRes: SendMsg = await fetch(`https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=${newToken.access_token}`, {
+            method: "POST",
+            body: JSON.stringify({
+                msgtype: type,
+                agentid: this.AgentId,
+                touser: toUid,
+                text: {
+                    content: msg,
+                },
+                duplicate_check_interval: 600,
+            })
+        }).then(res => {
+            return res.json();
+        })
+
+
+        return { sendMsgRes, newToken };
+    }
 
     /**
      * 
@@ -118,8 +157,6 @@ export class WxCom {
             }
 
         })
-
-
     }
     async MsgTest(body: string,) {
         var receBody: receBody = {
@@ -237,11 +274,11 @@ class Prpcrypt {
 }
 
 interface Token {
-    "errcode": number,
-    "errmsg": string,
-    "access_token": string,
-    "expires_in": number,
-    "add_in": number,
+    errcode: number;
+    errmsg: string;
+    access_token: string;
+    expires_in: number;
+    addIn: number;
 }
 
 interface receBody {
@@ -290,4 +327,13 @@ interface eventMessage {
     AgentID: number;
     Event: string;
     EventKey: string;
+}
+
+
+interface SendMsg {
+    errcode: number;
+    errmsg: string;
+    msgid: string;
+    Content: string;
+    MsgType: string;
 }
